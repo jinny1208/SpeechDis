@@ -117,3 +117,5 @@ output/
 TextGrid/
 hifigan/*.pth.tar
 *.out
+preprocessed_data/
+pretrained_models/

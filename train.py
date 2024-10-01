@@ -1,6 +1,6 @@
 import argparse
 import os
-
+import sys
 import torch
 import yaml
 import torch.nn as nn
@@ -15,6 +15,7 @@ from dataset import Dataset
 
 from evaluate import evaluate
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -196,6 +197,7 @@ def main(args, configs):
 
 
 if __name__ == "__main__":
+    sys.argv = ['train.py', '-p', 'config/LibriTTS/preprocess.yaml', '-m', 'config/LibriTTS/model.yaml', '-t', 'config/LibriTTS/train.yaml', '--restore_step', '100000']
     parser = argparse.ArgumentParser()
     parser.add_argument("--restore_step", type=int, default=0)
     parser.add_argument(
