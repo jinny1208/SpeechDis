@@ -4,6 +4,7 @@ import json
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from ema_pytorch import EMA
 
 from .modules import (
     MelStyleEncoder,
@@ -24,6 +25,20 @@ class StyleSpeech(nn.Module):
         self.model_config = model_config
 
         self.mel_style_encoder = MelStyleEncoder(preprocess_config, model_config)
+
+        # Initialize EMA for MelStyleEncoder
+        self.update_after_step = model_config["EMA"]["update_after_step"]
+        self.update_every = model_config["EMA"]["update_every"]
+        self.beta = model_config["EMA"]["beta"]
+
+        # Wrap the instantiated MelStyleEncoder with EMA
+        self.ema_mel_style_encoder = EMA(
+            self.mel_style_encoder,
+            beta=self.beta,
+            update_after_step=self.update_after_step,
+            update_every=self.update_every,
+        )
+
         self.phoneme_encoder = PhonemeEncoder(model_config)
         self.variance_adaptor = VarianceAdaptor(preprocess_config, model_config)
         self.mel_decoder = MelDecoder(model_config)
@@ -110,6 +125,9 @@ class StyleSpeech(nn.Module):
         mels,
         mel_lens,
         max_mel_len,
+        mels_partial,
+        mels_partial_len,
+        max_mels_partial_len,
         p_targets=None,
         e_targets=None,
         d_targets=None,
@@ -119,8 +137,10 @@ class StyleSpeech(nn.Module):
     ):
         src_masks = get_mask_from_lengths(src_lens, max_src_len)
         mel_masks = get_mask_from_lengths(mel_lens, max_mel_len)
+        partial_mel_masks = get_mask_from_lengths(mels_partial_len, max_mels_partial_len)
 
         style_vector = self.mel_style_encoder(mels, mel_masks)
+        ema_style_vector = self.ema_mel_style_encoder(mels_partial, partial_mel_masks)
 
         (
             output,

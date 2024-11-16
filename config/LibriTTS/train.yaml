@@ -1,7 +1,7 @@
 path:
-  ckpt_path: "./output/ckpt/LibriTTS-base-withMeta"
-  log_path: "./output/log/LibriTTS-base-withMeta"
-  result_path: "./output/result/LibriTTS-base-withMeta/base-300000-normal"
+  ckpt_path: "./output/ckpt/1-EMAv1"
+  log_path: "./output/log/1-EMAv1"
+  result_path: "./output/result/1-EMAv1"
 optimizer:
   batch_size: 8
   betas: [0.9, 0.98]
@@ -17,7 +17,7 @@ optimizer:
 step:
   meta_learning_warmup: 800000
   total_step: 800000
-  log_step: 100
-  synth_step: 1000
-  val_step: 1000
-  save_step: 50000
+  log_step: 10
+  synth_step: 100
+  val_step: 100
+  save_step: 50

@@ -21,13 +21,6 @@ class Dataset(Dataset):
         self.cleaners = preprocess_config["preprocessing"]["text"]["text_cleaners"]
         self.batch_size = train_config["optimizer"]["batch_size"]
 
-        self.time_mask = preprocess_config["preprocessing"]["time_mask"]
-        self.freq_mask = preprocess_config["preprocessing"]["freq_mask"]
-        self.R = preprocess_config["preprocessing"]["R"]
-        self.F = preprocess_config["preprocessing"]["F"]
-        self.mR = preprocess_config["preprocessing"]["mR"]
-        self.mF = preprocess_config["preprocessing"]["mF"]
-
         self.basename, self.speaker, self.text, self.raw_text, self.speaker_to_ids = self.process_meta(
             filename
         )
@@ -56,6 +49,10 @@ class Dataset(Dataset):
         mel = np.load(mel_path)
         mel_max_length, num_mel_bins = mel.shape
 
+        partial_length = int(mel_max_length * 0.75)
+        # Slice the Mel spectrogram to retain only the first 75%
+        mel_partial = mel[:partial_length, :]
+
         pitch_path = os.path.join(
             self.preprocessed_path,
             "pitch",
@@ -81,59 +78,22 @@ class Dataset(Dataset):
         )
         quary_duration = np.load(quary_duration_path)
 
-        if self.time_mask is True:
-            spec = torch.tensor(mel.copy())
-            masked_spec = self.time_masking(spec.clone(), mel_max_length, self.R, self.mR)
-            # print("time")
-            sample = {
-                "id": basename,
-                "speaker": speaker_id,
-                "text": phone,
-                "raw_text": raw_text,
-                "quary_text": query_phone,
-                "raw_quary_text": raw_quary_text,
-                "mel": masked_spec,
-                "pitch": pitch,
-                "energy": energy,
-                "duration": duration,
-                "quary_duration": quary_duration,
-            }
-        
-        elif self.freq_mask is True:
-            spec = torch.tensor(mel.copy())
-            masked_spec = self.frequency_masking(spec, num_mel_bins, self.F, self.mF)
-            # print("freq")
-            sample = {
-                "id": basename,
-                "speaker": speaker_id,
-                "text": phone,
-                "raw_text": raw_text,
-                "quary_text": query_phone,
-                "raw_quary_text": raw_quary_text,
-                "mel": masked_spec,
-                "pitch": pitch,
-                "energy": energy,
-                "duration": duration,
-                "quary_duration": quary_duration,
-            }
 
-        elif self.time_mask==False and self.freq_mask==False:          
-            # print("none")
-            sample = {
-                "id": basename,
-                "speaker": speaker_id,
-                "text": phone,
-                "raw_text": raw_text,
-                "quary_text": query_phone,
-                "raw_quary_text": raw_quary_text,
-                "mel": mel,
-                "pitch": pitch,
-                "energy": energy,
-                "duration": duration,
-                "quary_duration": quary_duration,
-            }
+        sample = {
+            "id": basename,
+            "speaker": speaker_id,
+            "text": phone,
+            "raw_text": raw_text,
+            "quary_text": query_phone,
+            "raw_quary_text": raw_quary_text,
+            "mel": mel,
+            "mel_partial": mel_partial,
+            "pitch": pitch,
+            "energy": energy,
+            "duration": duration,
+            "quary_duration": quary_duration,
+        }
 
-    
         return sample
 
     def process_meta(self, filename):
@@ -165,6 +125,7 @@ class Dataset(Dataset):
         quary_texts = [data[idx]["quary_text"] for idx in idxs]
         raw_quary_texts = [data[idx]["raw_quary_text"] for idx in idxs]
         mels = [data[idx]["mel"] for idx in idxs]
+        mels_partial = [data[idx]["mel_partial"] for idx in idxs]
         pitches = [data[idx]["pitch"] for idx in idxs]
         energies = [data[idx]["energy"] for idx in idxs]
         durations = [data[idx]["duration"] for idx in idxs]
@@ -173,11 +134,13 @@ class Dataset(Dataset):
         text_lens = np.array([text.shape[0] for text in texts])
         quary_text_lens = np.array([text.shape[0] for text in quary_texts])
         mel_lens = np.array([mel.shape[0] for mel in mels])
+        partial_mel_lens = np.array([partial.shape[0] for partial in mels_partial])
 
         speakers = np.array(speakers)
         texts = pad_1D(texts)
         quary_texts = pad_1D(quary_texts)
         mels = pad_2D(mels)
+        mels_partial = pad_2D(mels_partial)
         pitches = pad_1D(pitches)
         energies = pad_1D(energies)
         durations = pad_1D(durations)
@@ -193,6 +156,9 @@ class Dataset(Dataset):
             mels,
             mel_lens,
             max(mel_lens),
+            mels_partial,
+            partial_mel_lens,
+            max(partial_mel_lens),
             pitches,
             energies,
             durations,
@@ -223,21 +189,6 @@ class Dataset(Dataset):
             output.append(self.reprocess(data, idx))
 
         return output
-
-    def time_masking(self, spec, T, R, mR):
-        for _ in range(mR):
-            tau = random.randint(0, R)
-            t = random.randint(0, max(0, T - tau))
-            spec[:, t:t + tau] = 0
-        return spec
-
-    def frequency_masking(self, spec, num_mel_bins, F, mF):
-        for _ in range(mF):
-            phi = random.randint(0, F)
-            f = random.randint(0, max(0, num_mel_bins - phi))
-            spec[f:f + phi, :] = 0
-        return spec
-
 
 
 class BatchInferenceDataset(Dataset):

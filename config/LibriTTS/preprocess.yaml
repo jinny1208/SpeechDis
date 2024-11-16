@@ -28,9 +28,4 @@ preprocessing:
   energy:
     feature: "phoneme_level" # support 'phoneme_level' or 'frame_level'
     normalization: True
-  time_mask: True
-  freq_mask: False
-  R: 10 # maximum time mask paramter
-  F: 10 # maximum frequency mask parameter
-  mR: 4 # number of time masks
-  mF: 2 # number of frequency masks
+
