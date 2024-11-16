@@ -15,8 +15,9 @@ from dataset import Dataset
 
 from evaluate import evaluate
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda")
 
 
 def backward(model, optimizer, total_loss, step, grad_acc_step, grad_clip_thresh):
@@ -199,7 +200,7 @@ def main(args, configs):
 if __name__ == "__main__":
     sys.argv = ['train.py', '-p', 'config/LibriTTS/preprocess.yaml', '-m', 'config/LibriTTS/model.yaml', '-t', 'config/LibriTTS/train.yaml']
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, default=150000)
+    parser.add_argument("--restore_step", type=int, default=400000)
     parser.add_argument(
         "-p",
         "--preprocess_config",

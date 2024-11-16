@@ -2,7 +2,7 @@ import json
 import math
 import os
 import random
-
+import torch
 import numpy as np
 from torch.utils.data import Dataset
 
@@ -20,6 +20,13 @@ class Dataset(Dataset):
         self.preprocessed_path = preprocess_config["path"]["preprocessed_path"]
         self.cleaners = preprocess_config["preprocessing"]["text"]["text_cleaners"]
         self.batch_size = train_config["optimizer"]["batch_size"]
+
+        self.time_mask = preprocess_config["preprocessing"]["time_mask"]
+        self.freq_mask = preprocess_config["preprocessing"]["freq_mask"]
+        self.R = preprocess_config["preprocessing"]["R"]
+        self.F = preprocess_config["preprocessing"]["F"]
+        self.mR = preprocess_config["preprocessing"]["mR"]
+        self.mF = preprocess_config["preprocessing"]["mF"]
 
         self.basename, self.speaker, self.text, self.raw_text, self.speaker_to_ids = self.process_meta(
             filename
@@ -47,6 +54,8 @@ class Dataset(Dataset):
             "{}-mel-{}.npy".format(speaker, basename),
         )
         mel = np.load(mel_path)
+        mel_max_length, num_mel_bins = mel.shape
+
         pitch_path = os.path.join(
             self.preprocessed_path,
             "pitch",
@@ -72,20 +81,59 @@ class Dataset(Dataset):
         )
         quary_duration = np.load(quary_duration_path)
 
-        sample = {
-            "id": basename,
-            "speaker": speaker_id,
-            "text": phone,
-            "raw_text": raw_text,
-            "quary_text": query_phone,
-            "raw_quary_text": raw_quary_text,
-            "mel": mel,
-            "pitch": pitch,
-            "energy": energy,
-            "duration": duration,
-            "quary_duration": quary_duration,
-        }
+        if self.time_mask is True:
+            spec = torch.tensor(mel.copy())
+            masked_spec = self.time_masking(spec.clone(), mel_max_length, self.R, self.mR)
+            # print("time")
+            sample = {
+                "id": basename,
+                "speaker": speaker_id,
+                "text": phone,
+                "raw_text": raw_text,
+                "quary_text": query_phone,
+                "raw_quary_text": raw_quary_text,
+                "mel": masked_spec,
+                "pitch": pitch,
+                "energy": energy,
+                "duration": duration,
+                "quary_duration": quary_duration,
+            }
+        
+        elif self.freq_mask is True:
+            spec = torch.tensor(mel.copy())
+            masked_spec = self.frequency_masking(spec, num_mel_bins, self.F, self.mF)
+            # print("freq")
+            sample = {
+                "id": basename,
+                "speaker": speaker_id,
+                "text": phone,
+                "raw_text": raw_text,
+                "quary_text": query_phone,
+                "raw_quary_text": raw_quary_text,
+                "mel": masked_spec,
+                "pitch": pitch,
+                "energy": energy,
+                "duration": duration,
+                "quary_duration": quary_duration,
+            }
 
+        elif self.time_mask==False and self.freq_mask==False:          
+            # print("none")
+            sample = {
+                "id": basename,
+                "speaker": speaker_id,
+                "text": phone,
+                "raw_text": raw_text,
+                "quary_text": query_phone,
+                "raw_quary_text": raw_quary_text,
+                "mel": mel,
+                "pitch": pitch,
+                "energy": energy,
+                "duration": duration,
+                "quary_duration": quary_duration,
+            }
+
+    
         return sample
 
     def process_meta(self, filename):
@@ -176,6 +224,21 @@ class Dataset(Dataset):
 
         return output
 
+    def time_masking(self, spec, T, R, mR):
+        for _ in range(mR):
+            tau = random.randint(0, R)
+            t = random.randint(0, max(0, T - tau))
+            spec[:, t:t + tau] = 0
+        return spec
+
+    def frequency_masking(self, spec, num_mel_bins, F, mF):
+        for _ in range(mF):
+            phi = random.randint(0, F)
+            f = random.randint(0, max(0, num_mel_bins - phi))
+            spec[f:f + phi, :] = 0
+        return spec
+
+
 
 class BatchInferenceDataset(Dataset):
     def __init__(self, filepath, preprocess_config):
@@ -208,7 +271,7 @@ class BatchInferenceDataset(Dataset):
             "mel",
             "{}-mel-{}.npy".format(speaker, basename),
         )
-        mel = np.load(mel_path)
+        mel = np.load(mel_path)        
         pitch_path = os.path.join(
             self.preprocessed_path,
             "pitch",
@@ -227,9 +290,7 @@ class BatchInferenceDataset(Dataset):
             "{}-duration-{}.npy".format(speaker, basename),
         )
         duration = np.load(duration_path)
-
-        return (basename, speaker_id, phone, raw_text, mel, pitch, energy, duration)
-
+        
     def process_meta(self, filename):
         with open(filename, "r", encoding="utf-8") as f:
             name = []

@@ -2,9 +2,9 @@ dataset: "LibriTTS"
 
 path:
   corpus_path: "/home/jeonyj0612/dataset/LibriTTS/train-clean-460"
-  lexicon_path: "/home/jeonyj0612/SG-PAC2/lexicon/librispeech-lexicon.txt"
-  raw_path: "/home/jeonyj0612/SG-PAC2/raw_data/LibriTTS"
-  preprocessed_path: "/home/jeonyj0612/SG-PAC2/preprocessed_data/LibriTTS-100"
+  lexicon_path: "/home/jeonyj0612/SpeechDis/lexicon/librispeech-lexicon.txt"
+  raw_path: "/home/jeonyj0612/SpeechDis/raw_data/LibriTTS"
+  preprocessed_path: "/home/jeonyj0612/SpeechDis/preprocessed_data/LibriTTS-100"
 
 preprocessing:
   val_size: 512
@@ -28,3 +28,9 @@ preprocessing:
   energy:
     feature: "phoneme_level" # support 'phoneme_level' or 'frame_level'
     normalization: True
+  time_mask: True
+  freq_mask: False
+  R: 10 # maximum time mask paramter
+  F: 10 # maximum frequency mask parameter
+  mR: 4 # number of time masks
+  mF: 2 # number of frequency masks

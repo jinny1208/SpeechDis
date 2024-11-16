@@ -21,7 +21,8 @@ from .blocks import (
 )
 from text.symbols import symbols
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda")
 
 
 def get_sinusoid_encoding_table(n_position, d_hid, padding_idx=None):

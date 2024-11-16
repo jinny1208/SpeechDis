@@ -131,3 +131,11 @@ The loss curves, synthesized mel-spectrograms, and audios are shown.
 - [Prototypical Networks for Few-shot Learning](https://arxiv.org/pdf/1703.05175v2.pdf)
 - [TADAM: Task dependent adaptive metric for improved few-shot learning](https://arxiv.org/abs/1805.10123)
 - [ming024's FastSpeech2](https://github.com/ming024/FastSpeech2)
+
+
+
+# NOTES:
+- 300000 time musk
+- 300000 freq luhman
+- Random masking for mel-spectrogram (time and or frequency domain) during fine-tuning e2e of the entire architecture.
+- FastSpeech 기반
