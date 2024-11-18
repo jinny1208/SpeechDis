@@ -140,6 +140,7 @@ class StyleSpeech(nn.Module):
         partial_mel_masks = get_mask_from_lengths(mels_partial_len, max_mels_partial_len)
 
         style_vector = self.mel_style_encoder(mels, mel_masks)
+        teach_style_vector = style_vector.clone().detach()
         ema_style_vector = self.ema_mel_style_encoder(mels_partial, partial_mel_masks)
 
         (
@@ -166,7 +167,7 @@ class StyleSpeech(nn.Module):
 
         return (
             output,
-            style_vector,
+            teach_style_vector,
             ema_style_vector,
             p_predictions,
             e_predictions,
