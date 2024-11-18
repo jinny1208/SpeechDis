@@ -158,8 +158,8 @@ def expand(values, durations):
 def synth_one_sample(targets, predictions, vocoder, model_config, preprocess_config):
 
     basename = targets[0][0]
-    src_len = predictions[7][0].item()
-    mel_len = predictions[8][0].item()
+    src_len = predictions[9][0].item()
+    mel_len = predictions[10][0].item()
     mel_target = targets[6][0, :mel_len].detach().transpose(0, 1)
     mel_prediction = predictions[0][0, :mel_len].detach().transpose(0, 1)
     duration = targets[14][0, :src_len].detach().cpu().numpy()
