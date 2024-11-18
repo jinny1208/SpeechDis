@@ -166,6 +166,8 @@ class StyleSpeech(nn.Module):
 
         return (
             output,
+            style_vector,
+            ema_style_vector,
             p_predictions,
             e_predictions,
             log_d_predictions,
