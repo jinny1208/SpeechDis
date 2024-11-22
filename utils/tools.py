@@ -78,7 +78,7 @@ def to_device(data, device):
             quary_durations,
         )
 
-    if len(data) == 10:
+    if len(data) == 13:
         (
             ids,
             raw_texts,
@@ -89,6 +89,9 @@ def to_device(data, device):
             mels,
             mel_lens,
             max_mel_len,
+            mels_temp,
+            mel_lens_temp,
+            max_mel_len_temp,
             ref_infos,
         ) = data
 
@@ -96,6 +99,8 @@ def to_device(data, device):
         src_lens = torch.from_numpy(src_lens).to(device)
         mels = torch.from_numpy(mels).float().to(device)
         mel_lens = torch.from_numpy(mel_lens).to(device)
+        mels_temp = torch.from_numpy(mels_temp).float().to(device)
+        mel_lens_temp = torch.from_numpy(mel_lens_temp).to(device)
 
         return (
             ids,
@@ -107,6 +112,9 @@ def to_device(data, device):
             mels,
             mel_lens,
             max_mel_len,
+            mels_temp,
+            mel_lens_temp,
+            max_mel_len_temp,
             ref_infos,
         )
 
