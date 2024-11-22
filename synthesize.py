@@ -166,7 +166,7 @@ def synthesize(model, step, configs, vocoder, batchs, control_values):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, default=200000)
+    parser.add_argument("--restore_step", type=int, default=400000)
     args = parser.parse_args()
 
     mode = "single"

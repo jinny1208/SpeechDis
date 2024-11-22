@@ -1,7 +1,7 @@
 path:
   ckpt_path: "./output/ckpt/1-EMAv1-withoutLoss"
   log_path: "./output/log/1-EMAv1-withoutLoss"
-  result_path: "./output/result/1-EMAv1-withoutLoss-200000-0.50"
+  result_path: "./output/result/1-EMAv1-withoutLoss-400000-0.25"
 optimizer:
   batch_size: 16
   betas: [0.9, 0.98]
