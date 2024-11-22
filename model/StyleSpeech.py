@@ -151,7 +151,7 @@ class StyleSpeech(nn.Module):
             mel_lens,
             mel_masks,
         ) = self.G(
-            style_vector,
+            ema_style_vector,
             texts,
             src_masks,  
             mel_masks,
