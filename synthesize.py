@@ -166,7 +166,7 @@ def synthesize(model, step, configs, vocoder, batchs, control_values):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, default=300000)
+    parser.add_argument("--restore_step", type=int, default=400000)
     args = parser.parse_args()
 
     mode = "single"
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     train_config = "config/LibriTTS/train.yaml"
 
 
-    ref_audio_dir = "/home/jeonyj0612/SpeechDis/output/Reference_Audio_UASpeech/normal"
+    ref_audio_dir = "/home/jeonyj0612/SpeechDis/output/Reference_Audio_UASpeech/"
 
     # Read Config
     preprocess_config = yaml.load(
@@ -208,8 +208,11 @@ if __name__ == "__main__":
                 texts = np.array([preprocess_english(text, preprocess_config)])
                 text_lens = np.array([len(texts[0])])
                 mels, mel_lens, ref_info = get_audio(preprocess_config, ref_audio)
+                mels_temp = mels
+                mel_lens_temp = mel_lens
+
                 batchs = [(["_".join([os.path.basename(ref_audio).strip(".wav"), id]) for id in ids], \
-                    raw_texts, None, texts, text_lens, max(text_lens), mels, mel_lens, max(mel_lens), [ref_info])]
+                    raw_texts, None, texts, text_lens, max(text_lens), mels, mel_lens, max(mel_lens), mels_temp, mel_lens_temp, max(mel_lens_temp), [ref_info])]
 
                 control_values = pitch_control, energy_control, duration_control
 
