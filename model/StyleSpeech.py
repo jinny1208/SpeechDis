@@ -4,7 +4,6 @@ import json
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ema_pytorch import EMA
 
 from .modules import (
     MelStyleEncoder,
@@ -25,19 +24,7 @@ class StyleSpeech(nn.Module):
         self.model_config = model_config
 
         self.mel_style_encoder = MelStyleEncoder(preprocess_config, model_config)
-
-        # Initialize EMA for MelStyleEncoder
-        self.update_after_step = model_config["EMA"]["update_after_step"]
-        self.update_every = model_config["EMA"]["update_every"]
-        self.beta = model_config["EMA"]["beta"]
-
-        # Wrap the instantiated MelStyleEncoder with EMA
-        self.ema_mel_style_encoder = EMA(
-            self.mel_style_encoder,
-            beta=self.beta,
-            update_after_step=self.update_after_step,
-            update_every=self.update_every,
-        )
+        self.mel_style_encoder_student = MelStyleEncoder(preprocess_config, model_config)
 
         self.phoneme_encoder = PhonemeEncoder(model_config)
         self.variance_adaptor = VarianceAdaptor(preprocess_config, model_config)
@@ -141,7 +128,7 @@ class StyleSpeech(nn.Module):
 
         style_vector = self.mel_style_encoder(mels, mel_masks)
         teach_style_vector = style_vector.clone().detach()
-        ema_style_vector = self.ema_mel_style_encoder(mels_partial, partial_mel_masks)
+        style_vector_not_ema_student = self.mel_style_encoder_student(mels_partial, partial_mel_masks)
 
         (
             output,
@@ -168,7 +155,7 @@ class StyleSpeech(nn.Module):
         return (
             output,
             teach_style_vector,
-            ema_style_vector,
+            style_vector_not_ema_student,
             p_predictions,
             e_predictions,
             log_d_predictions,

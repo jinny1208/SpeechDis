@@ -109,8 +109,6 @@ def main(args, configs):
 
                 # Backward
                 backward(model, optimizer_main, total_loss, step, grad_acc_step, grad_clip_thresh)
-                # Update EMA model
-                model.module.ema_mel_style_encoder.update()
 
                 # Meta Learning
                 if step > meta_learning_warmup:
@@ -181,7 +179,6 @@ def main(args, configs):
                     torch.save(
                         {
                             "model": model.module.state_dict(),
-                            "ema_model": model.module.ema_mel_style_encoder.state_dict(),
                             "optimizer_main": optimizer_main._optimizer.state_dict(),
                             "optimizer_disc": optimizer_disc._optimizer.state_dict(),
                         },
@@ -203,7 +200,7 @@ def main(args, configs):
 if __name__ == "__main__":
     sys.argv = ['train.py', '-p', 'config/LibriTTS/preprocess.yaml', '-m', 'config/LibriTTS/model.yaml', '-t', 'config/LibriTTS/train.yaml']
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, default=250000)
+    parser.add_argument("--restore_step", type=int, default=0)
     parser.add_argument(
         "-p",
         "--preprocess_config",
