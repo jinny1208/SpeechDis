@@ -83,7 +83,6 @@ class MetaStyleSpeechLossMain(nn.Module):
         mel_targets = mel_targets.masked_select(mel_masks.unsqueeze(-1))
 
         mel_loss = self.mae_loss(mel_predictions, mel_targets)
-        teacher_student_loss = self.mae_loss(student_style, teacher_style)
 
 
         pitch_loss = self.mse_loss(pitch_predictions, pitch_targets)
@@ -99,7 +98,7 @@ class MetaStyleSpeechLossMain(nn.Module):
 
         recon_loss = alpha * (mel_loss + duration_loss + pitch_loss + energy_loss)
         total_loss = (
-            recon_loss + D_s_loss + D_t_loss + teacher_student_loss
+            recon_loss + D_s_loss + D_t_loss
         )
 
         return (

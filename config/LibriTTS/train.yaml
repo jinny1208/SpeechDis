@@ -1,7 +1,7 @@
 path:
-  ckpt_path: "./output/ckpt/1-0-noEMA-withStudent-Teacher-Loss-0.75-0.50-0.25"
-  log_path: "./output/log/1-0-noEMA-withStudent-Teacher-Loss-0.75-0.50-0.25"
-  result_path: "./output/result/1-0-noEMA-withStudent-Teacher-Loss-0.75-0.50-0.25"
+  ckpt_path: "./output/ckpt/1-0-1-noEMA-withoutSTLoss-noCL"
+  log_path: "./output/log/1-0-1-noEMA-withoutSTLoss-noCL"
+  result_path: "./output/result/1-0-1-noEMA-withoutSTLoss-noCL"
 optimizer:
   batch_size: 64
   betas: [0.9, 0.98]
