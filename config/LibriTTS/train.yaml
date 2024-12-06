@@ -1,7 +1,7 @@
 path:
-  ckpt_path: "./output/ckpt/2-0-noEMA-withSTloss-3CL-ReinforceFeedback_asConcat"
-  log_path: "./output/log/2-0-noEMA-withSTloss-3CL-ReinforceFeedback_asConcat"
-  result_path: "./output/result/2-0-noEMA-withSTloss-3CL-ReinforceFeedback_asConcat"
+  ckpt_path: "./output/ckpt/2-1-noEMA-withSTloss-3CL-ReinforceFeedback_asLoss"
+  log_path: "./output/log/2-1-noEMA-withSTloss-3CL-ReinforceFeedback_asLoss"
+  result_path: "./output/result/2-1-noEMA-withSTloss-3CL-ReinforceFeedback_asLoss"
 optimizer:
   batch_size: 64
   betas: [0.9, 0.98]
