@@ -55,7 +55,7 @@ class MelStyleEncoder(nn.Module):
         super(MelStyleEncoder, self).__init__()
         n_position = model_config["max_seq_len"] + 1
         n_mel_channels = preprocess_config["preprocessing"]["mel"]["n_mel_channels"]
-        d_melencoder = model_config["melencoder"]["encoder_hidden"]
+        d_melencoder = model_config["melencoder"]["encoder_hidden"] #128
         n_spectral_layer = model_config["melencoder"]["spectral_layer"]
         n_temporal_layer = model_config["melencoder"]["temporal_layer"]
         n_slf_attn_layer = model_config["melencoder"]["slf_attn_layer"]
@@ -129,10 +129,10 @@ class MelStyleEncoder(nn.Module):
             enc_output = residual + enc_output
 
         # Final Layer
-        enc_output = self.fc_2(enc_output) # [B, T, H]
+        enc_output = self.fc_2(enc_output) # [B, T, H] # 128
 
         # Temporal Average Pooling
-        enc_output = torch.mean(enc_output, dim=1, keepdim=True) # [B, 1, H]
+        enc_output = torch.mean(enc_output, dim=1, keepdim=True) # [B, 1, H] # 128
 
         return enc_output
 

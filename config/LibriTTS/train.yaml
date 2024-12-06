@@ -1,7 +1,7 @@
 path:
-  ckpt_path: "./output/ckpt/1-0-noEMA-withStudent-Teacher-Loss-0.75-0.50-0.25"
-  log_path: "./output/log/1-0-noEMA-withStudent-Teacher-Loss-0.75-0.50-0.25"
-  result_path: "./output/result/1-0-noEMA-withStudent-Teacher-Loss-0.75-0.50-0.25"
+  ckpt_path: "./output/ckpt/2-0-noEMA-withSTloss-3CL-ReinforceFeedback_asConcat"
+  log_path: "./output/log/2-0-noEMA-withSTloss-3CL-ReinforceFeedback_asConcat"
+  result_path: "./output/result/2-0-noEMA-withSTloss-3CL-ReinforceFeedback_asConcat"
 optimizer:
   batch_size: 64
   betas: [0.9, 0.98]

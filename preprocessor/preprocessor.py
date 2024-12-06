@@ -161,11 +161,10 @@ from scipy.interpolate import interp1d
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 import audio as Audio
-import torchaudio
-from model.yin import *
 
-from speechbrain.pretrained import EncoderClassifier
-classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb")
+
+from resemblyzer import preprocess_wav, VoiceEncoder
+resemblyzerEnc = VoiceEncoder()
 random.seed(1234)
 
 
@@ -189,7 +188,7 @@ class Preprocessor:
         )
 
     def build_from_path(self):
-        os.makedirs((os.path.join(self.out_dir, "ecapa")), exist_ok=True)
+        os.makedirs((os.path.join(self.out_dir, "Resemblyzer")), exist_ok=True)
 
         print("Processing Data ...")
         out = list()
@@ -205,7 +204,7 @@ class Preprocessor:
                 basename = wav_name.split(".")[0]
                 chapter = basename.split("_")[1]
                 tg_path = os.path.join(
-                    self.out_dir, "TextGrid", speaker, "{}.TextGrid".format(basename)
+                    self.out_dir, "TextGrid", speaker, chapter, "{}.TextGrid".format(basename)
                 )
                 if os.path.exists(tg_path):
                     ret = self.process_utterance(speaker, chapter, basename)
@@ -223,7 +222,7 @@ class Preprocessor:
         wav_path = os.path.join(self.in_dir, speaker, "{}.wav".format(basename))
         text_path = os.path.join(self.in_dir, speaker, "{}.lab".format(basename))
         tg_path = os.path.join(
-            self.out_dir, "TextGrid", speaker, "{}.TextGrid".format(basename)
+            self.out_dir, "TextGrid", speaker, chapter, "{}.TextGrid".format(basename)
         )
 
         # Get alignments
@@ -235,24 +234,16 @@ class Preprocessor:
         if start >= end:
             return None
 
-        # Read and trim wav files
-        wav, sr = librosa.load(wav_path)
-        wav = wav[
-            int(self.sampling_rate * start) : int(self.sampling_rate * end)
-        ].astype(np.float32)
-
         # encode audio (i.e., wav) with pretrained ecapa speaker verification
-        wav_org, sr = torchaudio.load(wav_path)
-        if sr != 16000:
-            signal = torchaudio.functional.resample(wav_org, sr, 16000)
-        ecapa_embeddings = classifier.encode_batch(signal).squeeze(0) # shape: 1, 1, 192 --> 1, 192
+        raw_audio_preprocessed = preprocess_wav(wav_path)
+        resemblyzer_embedded = resemblyzerEnc.embed_utterance(raw_audio_preprocessed) # shape: 1, 1, 192 --> 1, 192
 
         # Read raw text
         with open(text_path, "r") as f:
             raw_text = f.readline().strip("\n")
 
-        ecapa_filename = "{}-ecapa-{}.npy".format(speaker, basename)
-        np.save(os.path.join(self.out_dir, "ecapa", ecapa_filename), ecapa_embeddings)
+        Resemblyzer_filename = "{}-Resemblyzer-{}.npy".format(speaker, basename)
+        np.save(os.path.join(self.out_dir, "Resemblyzer", Resemblyzer_filename), resemblyzer_embedded)
 
         return (
             "|".join([basename, speaker, text, raw_text]),

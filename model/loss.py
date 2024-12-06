@@ -25,6 +25,7 @@ class MetaStyleSpeechLossMain(nn.Module):
             _,
             _,
             _,
+            _,
             pitch_targets,
             energy_targets,
             duration_targets,
