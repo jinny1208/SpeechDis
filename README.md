@@ -135,7 +135,3 @@ The loss curves, synthesized mel-spectrograms, and audios are shown.
 
 
 # NOTES:
-- 300000 time musk
-- 300000 freq luhman
-- Random masking for mel-spectrogram (time and or frequency domain) during fine-tuning e2e of the entire architecture.
-- FastSpeech 기반
