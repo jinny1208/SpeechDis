@@ -55,7 +55,7 @@ class Dataset(Dataset):
         mel = np.load(mel_path)
         mel_max_length, num_mel_bins = mel.shape
 
-        partial_length = int(mel_max_length * 0.75)
+        partial_length = int(mel_max_length * 0.25)
         # Slice the Mel spectrogram to retain only the first 75%
         mel_partial = mel[:partial_length, :]
 

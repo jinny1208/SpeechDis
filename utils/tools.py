@@ -81,7 +81,7 @@ def to_device(data, device):
             quary_durations,
         )
 
-    if len(data) == 13: ## 추후 inference 할 때 고치기...??
+    if len(data) == 14: ## 추후 inference 할 때 고치기...??
         (
             ids,
             raw_texts,
@@ -95,6 +95,7 @@ def to_device(data, device):
             mels_temp,
             mel_lens_temp,
             max_mel_len_temp,
+            resemblyzer_embedded,
             ref_infos,
         ) = data
 
@@ -104,6 +105,10 @@ def to_device(data, device):
         mel_lens = torch.from_numpy(mel_lens).to(device)
         mels_temp = torch.from_numpy(mels_temp).float().to(device)
         mel_lens_temp = torch.from_numpy(mel_lens_temp).to(device)
+
+        # USE WHEN USING TEACHER MODEL DURING INFERENCE
+        resemblyzer_embedded = torch.from_numpy(resemblyzer_embedded).to(device)
+        resemblyzer_embedded = resemblyzer_embedded.unsqueeze(0)
 
         return (
             ids,
@@ -118,6 +123,7 @@ def to_device(data, device):
             mels_temp,
             mel_lens_temp,
             max_mel_len_temp,
+            resemblyzer_embedded,
             ref_infos,
         )
 

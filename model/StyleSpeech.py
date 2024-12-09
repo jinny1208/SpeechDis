@@ -131,13 +131,18 @@ class StyleSpeech(nn.Module):
         mel_masks = get_mask_from_lengths(mel_lens, max_mel_len)
         partial_mel_masks = get_mask_from_lengths(mels_partial_len, max_mels_partial_len)
 
+        
+        ################################# ONLY USED DURING TRAINING #################################
         style_vector = self.mel_style_encoder(mels, mel_masks) # 128
+
         # concatenate teacher style_vector with Resemblyzer
         resemblyzer_embedded = resemblyzer_embedded.unsqueeze(1)
         style_vector = torch.cat((style_vector, resemblyzer_embedded), -1) # output이 384이 되어서 linear 128으로
         style_vector = self.style_concat_linear(style_vector)
 
         teach_style_vector = style_vector.clone().detach()
+
+        #############################################################################################
         style_vector_not_ema_student = self.mel_style_encoder_student(mels_partial, partial_mel_masks)
 
         (
@@ -164,7 +169,7 @@ class StyleSpeech(nn.Module):
 
         return (
             output,
-            teach_style_vector,
+            teach_style_vector, # change to style_vector_not_ema_student DURING INFERENCE (originally teach_style_vector)
             style_vector_not_ema_student,
             p_predictions,
             e_predictions,
