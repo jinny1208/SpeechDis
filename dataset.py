@@ -37,6 +37,12 @@ class Dataset(Dataset):
         speaker = self.speaker[idx]
         speaker_id = self.speaker_map[speaker]
         raw_text = self.raw_text[idx]
+        resemblyzer_embedded_path = os.path.join(
+            self.preprocessed_path,
+            "Resemblyzer",
+            "{}-Resemblyzer-{}.npy".format(speaker, basename),
+        )
+        resemblyzer_embedded = np.load(resemblyzer_embedded_path)
         phone = np.array(text_to_sequence(self.text[idx], self.cleaners))
         query_idx = random.choice(self.speaker_to_ids[speaker]) # Sample the query text
         raw_quary_text = self.raw_text[query_idx]
@@ -88,6 +94,7 @@ class Dataset(Dataset):
             "raw_quary_text": raw_quary_text,
             "mel": mel,
             "mel_partial": mel_partial,
+            "resemblyzer_embedded": resemblyzer_embedded,
             "pitch": pitch,
             "energy": energy,
             "duration": duration,
@@ -130,6 +137,8 @@ class Dataset(Dataset):
         energies = [data[idx]["energy"] for idx in idxs]
         durations = [data[idx]["duration"] for idx in idxs]
         quary_durations = [data[idx]["quary_duration"] for idx in idxs]
+        resemblyzer_embedded = [data[idx]["resemblyzer_embedded"] for idx in idxs]
+
 
         text_lens = np.array([text.shape[0] for text in texts])
         quary_text_lens = np.array([text.shape[0] for text in quary_texts])
@@ -159,6 +168,7 @@ class Dataset(Dataset):
             mels_partial,
             partial_mel_lens,
             max(partial_mel_lens),
+            resemblyzer_embedded,
             pitches,
             energies,
             durations,

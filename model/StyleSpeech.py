@@ -115,6 +115,7 @@ class StyleSpeech(nn.Module):
         mels_partial,
         mels_partial_len,
         max_mels_partial_len,
+        resemblyzer_embedded,
         p_targets=None,
         e_targets=None,
         d_targets=None,
@@ -126,7 +127,7 @@ class StyleSpeech(nn.Module):
         mel_masks = get_mask_from_lengths(mel_lens, max_mel_len)
         partial_mel_masks = get_mask_from_lengths(mels_partial_len, max_mels_partial_len)
 
-        style_vector = self.mel_style_encoder(mels, mel_masks)
+        style_vector = resemblyzer_embedded.unsqueeze(1)
         teach_style_vector = style_vector.clone().detach()
         style_vector_not_ema_student = self.mel_style_encoder_student(mels_partial, partial_mel_masks)
 
