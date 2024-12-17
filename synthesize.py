@@ -166,7 +166,7 @@ def synthesize(model, step, configs, vocoder, batchs, control_values):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, default=400000)
+    parser.add_argument("--restore_step", type=int, default=500000)
     args = parser.parse_args()
 
     mode = "single"
@@ -211,8 +211,10 @@ if __name__ == "__main__":
                 mels_temp = mels
                 mel_lens_temp = mel_lens
 
+                resemblyzer_embedded = torch.zeros([1, 128], dtype=torch.int32)
+
                 batchs = [(["_".join([os.path.basename(ref_audio).strip(".wav"), id]) for id in ids], \
-                    raw_texts, None, texts, text_lens, max(text_lens), mels, mel_lens, max(mel_lens), mels_temp, mel_lens_temp, max(mel_lens_temp), [ref_info])]
+                    raw_texts, None, texts, text_lens, max(text_lens), mels, mel_lens, max(mel_lens), mels_temp, mel_lens_temp, max(mel_lens_temp), resemblyzer_embedded, [ref_info])]
 
                 control_values = pitch_control, energy_control, duration_control
 

@@ -81,7 +81,7 @@ def to_device(data, device):
             quary_durations,
         )
 
-    if len(data) == 13: ## 추후 inference 할 때 고치기...??
+    if len(data) == 14: ## 추후 inference 할 때 고치기...??
         (
             ids,
             raw_texts,
@@ -95,6 +95,7 @@ def to_device(data, device):
             mels_temp,
             mel_lens_temp,
             max_mel_len_temp,
+            resemblyzer_embedded,
             ref_infos,
         ) = data
 
@@ -118,6 +119,7 @@ def to_device(data, device):
             mels_temp,
             mel_lens_temp,
             max_mel_len_temp,
+            resemblyzer_embedded,
             ref_infos,
         )
 
