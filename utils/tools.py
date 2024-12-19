@@ -106,6 +106,10 @@ def to_device(data, device):
         mels_temp = torch.from_numpy(mels_temp).float().to(device)
         mel_lens_temp = torch.from_numpy(mel_lens_temp).to(device)
 
+        # # USE WHEN USING TEACHER MODEL DURING INFERENCE
+        # resemblyzer_embedded = torch.from_numpy(resemblyzer_embedded).to(device)
+        # resemblyzer_embedded = resemblyzer_embedded.unsqueeze(0)
+
         return (
             ids,
             raw_texts,
