@@ -110,6 +110,7 @@ class StyleSpeech(nn.Module):
         mels,
         mel_lens,
         max_mel_len,
+        resemblyzer_embedded,
         p_targets=None,
         e_targets=None,
         d_targets=None,
@@ -120,7 +121,7 @@ class StyleSpeech(nn.Module):
         src_masks = get_mask_from_lengths(src_lens, max_src_len)
         mel_masks = get_mask_from_lengths(mel_lens, max_mel_len)
 
-        style_vector = self.mel_style_encoder(mels, mel_masks)
+        style_vector = resemblyzer_embedded.unsqueeze(1)
 
         (
             output,

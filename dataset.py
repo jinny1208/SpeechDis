@@ -44,6 +44,12 @@ class Dataset(Dataset):
         speaker = self.speaker[idx]
         speaker_id = self.speaker_map[speaker]
         raw_text = self.raw_text[idx]
+        resemblyzer_embedded_path = os.path.join(
+            self.preprocessed_path,
+            "Resemblyzer",
+            "{}-Resemblyzer-{}.npy".format(speaker, basename),
+        )
+        resemblyzer_embedded = np.load(resemblyzer_embedded_path)
         phone = np.array(text_to_sequence(self.text[idx], self.cleaners))
         query_idx = random.choice(self.speaker_to_ids[speaker]) # Sample the query text
         raw_quary_text = self.raw_text[query_idx]
@@ -81,57 +87,20 @@ class Dataset(Dataset):
         )
         quary_duration = np.load(quary_duration_path)
 
-        if self.time_mask is True:
-            spec = torch.tensor(mel.copy())
-            masked_spec = self.time_masking(spec.clone(), mel_max_length, self.R, self.mR)
-            # print("time")
-            sample = {
-                "id": basename,
-                "speaker": speaker_id,
-                "text": phone,
-                "raw_text": raw_text,
-                "quary_text": query_phone,
-                "raw_quary_text": raw_quary_text,
-                "mel": masked_spec,
-                "pitch": pitch,
-                "energy": energy,
-                "duration": duration,
-                "quary_duration": quary_duration,
-            }
-        
-        elif self.freq_mask is True:
-            spec = torch.tensor(mel.copy())
-            masked_spec = self.frequency_masking(spec, num_mel_bins, self.F, self.mF)
-            # print("freq")
-            sample = {
-                "id": basename,
-                "speaker": speaker_id,
-                "text": phone,
-                "raw_text": raw_text,
-                "quary_text": query_phone,
-                "raw_quary_text": raw_quary_text,
-                "mel": masked_spec,
-                "pitch": pitch,
-                "energy": energy,
-                "duration": duration,
-                "quary_duration": quary_duration,
-            }
-
-        elif self.time_mask==False and self.freq_mask==False:          
-            # print("none")
-            sample = {
-                "id": basename,
-                "speaker": speaker_id,
-                "text": phone,
-                "raw_text": raw_text,
-                "quary_text": query_phone,
-                "raw_quary_text": raw_quary_text,
-                "mel": mel,
-                "pitch": pitch,
-                "energy": energy,
-                "duration": duration,
-                "quary_duration": quary_duration,
-            }
+        sample = {
+            "id": basename,
+            "speaker": speaker_id,
+            "text": phone,
+            "raw_text": raw_text,
+            "quary_text": query_phone,
+            "raw_quary_text": raw_quary_text,
+            "mel": mel,
+            "resemblyzer_embedded": resemblyzer_embedded,
+            "pitch": pitch,
+            "energy": energy,
+            "duration": duration,
+            "quary_duration": quary_duration,
+        }
 
     
         return sample
@@ -169,6 +138,7 @@ class Dataset(Dataset):
         energies = [data[idx]["energy"] for idx in idxs]
         durations = [data[idx]["duration"] for idx in idxs]
         quary_durations = [data[idx]["quary_duration"] for idx in idxs]
+        resemblyzer_embedded = [data[idx]["resemblyzer_embedded"] for idx in idxs]
 
         text_lens = np.array([text.shape[0] for text in texts])
         quary_text_lens = np.array([text.shape[0] for text in quary_texts])
@@ -193,6 +163,7 @@ class Dataset(Dataset):
             mels,
             mel_lens,
             max(mel_lens),
+            resemblyzer_embedded,
             pitches,
             energies,
             durations,
