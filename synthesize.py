@@ -20,6 +20,9 @@ from utils.tools import to_device, synth_samples
 from dataset import BatchInferenceDataset
 from text import text_to_sequence
 
+from resemblyzer import preprocess_wav, VoiceEncoder
+resemblyzerEnc = VoiceEncoder()
+
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -166,7 +169,7 @@ def synthesize(model, step, configs, vocoder, batchs, control_values):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, default=400000)
+    parser.add_argument("--restore_step", type=int, default=500000)
     args = parser.parse_args()
 
     mode = "single"
@@ -196,6 +199,10 @@ if __name__ == "__main__":
 
     for ref_audio in os.listdir(ref_audio_dir):
         ref_audio = os.path.join(ref_audio_dir, ref_audio)
+        # ##### WHEN USING TEACHER MODEL DURING INFERENCE ####
+        # raw_audio_preprocessed = preprocess_wav(ref_audio)
+        # resemblyzer_embedded = resemblyzerEnc.embed_utterance(raw_audio_preprocessed)
+        ####################################################
         count = 1
     
         if count < 6:
@@ -210,9 +217,14 @@ if __name__ == "__main__":
                 mels, mel_lens, ref_info = get_audio(preprocess_config, ref_audio)
                 mels_temp = mels
                 mel_lens_temp = mel_lens
+                
+                # when using student model:
+                resemblyzer_embedded = torch.zeros([1, 128], dtype=torch.int32)
+
+                # when using teacher model during inference: COMMENT THE ABOVE OUT
 
                 batchs = [(["_".join([os.path.basename(ref_audio).strip(".wav"), id]) for id in ids], \
-                    raw_texts, None, texts, text_lens, max(text_lens), mels, mel_lens, max(mel_lens), mels_temp, mel_lens_temp, max(mel_lens_temp), [ref_info])]
+                    raw_texts, None, texts, text_lens, max(text_lens), mels, mel_lens, max(mel_lens), mels_temp, mel_lens_temp, max(mel_lens_temp), resemblyzer_embedded, [ref_info])]
 
                 control_values = pitch_control, energy_control, duration_control
 
