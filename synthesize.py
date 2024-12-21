@@ -20,8 +20,10 @@ from utils.tools import to_device, synth_samples
 from dataset import BatchInferenceDataset
 from text import text_to_sequence
 
+from resemblyzer import preprocess_wav, VoiceEncoder
+resemblyzerEnc = VoiceEncoder()
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
@@ -166,7 +168,7 @@ def synthesize(model, step, configs, vocoder, batchs, control_values):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--restore_step", type=int, default=300000)
+    parser.add_argument("--restore_step", type=int, default=500000)
     args = parser.parse_args()
 
     mode = "single"
@@ -178,7 +180,7 @@ if __name__ == "__main__":
     train_config = "config/LibriTTS/train.yaml"
 
 
-    ref_audio_dir = "/home/jeonyj0612/SpeechDis/output/Reference_Audio_UASpeech/normal"
+    ref_audio_dir = "/home/jeonyj0612/SpeechDis/output/Reference_Audio_UASpeech"
 
     # Read Config
     preprocess_config = yaml.load(
@@ -196,6 +198,10 @@ if __name__ == "__main__":
 
     for ref_audio in os.listdir(ref_audio_dir):
         ref_audio = os.path.join(ref_audio_dir, ref_audio)
+
+        raw_audio_preprocessed = preprocess_wav(ref_audio)
+        resemblyzer_embedded = resemblyzerEnc.embed_utterance(raw_audio_preprocessed)
+
         count = 1
     
         if count < 6:
@@ -209,7 +215,7 @@ if __name__ == "__main__":
                 text_lens = np.array([len(texts[0])])
                 mels, mel_lens, ref_info = get_audio(preprocess_config, ref_audio)
                 batchs = [(["_".join([os.path.basename(ref_audio).strip(".wav"), id]) for id in ids], \
-                    raw_texts, None, texts, text_lens, max(text_lens), mels, mel_lens, max(mel_lens), [ref_info])]
+                    raw_texts, None, texts, text_lens, max(text_lens), mels, mel_lens, max(mel_lens), resemblyzer_embedded, [ref_info])]
 
                 control_values = pitch_control, energy_control, duration_control
 

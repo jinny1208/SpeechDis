@@ -73,7 +73,7 @@ def to_device(data, device):
             quary_durations,
         )
 
-    if len(data) == 10: #  inference 때 고치기 
+    if len(data) == 11: #  inference 때 고치기 
         (
             ids,
             raw_texts,
@@ -84,6 +84,7 @@ def to_device(data, device):
             mels,
             mel_lens,
             max_mel_len,
+            resemblyzer_embedded,
             ref_infos,
         ) = data
 
@@ -91,6 +92,9 @@ def to_device(data, device):
         src_lens = torch.from_numpy(src_lens).to(device)
         mels = torch.from_numpy(mels).float().to(device)
         mel_lens = torch.from_numpy(mel_lens).to(device)
+
+        resemblyzer_embedded = torch.from_numpy(resemblyzer_embedded).to(device)
+        resemblyzer_embedded = resemblyzer_embedded.unsqueeze(0)
 
         return (
             ids,
@@ -102,6 +106,7 @@ def to_device(data, device):
             mels,
             mel_lens,
             max_mel_len,
+            resemblyzer_embedded,
             ref_infos,
         )
 
